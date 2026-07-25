@@ -1,0 +1,1783 @@
+﻿@{
+    ViewBag.Title = "Planner";
+}
+
+<link href="https://kendo.cdn.telerik.com/2024.1.130/styles/kendo.default-v2.min.css" rel="stylesheet" />
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://kendo.cdn.telerik.com/2024.1.130/js/kendo.all.min.js"></script>
+
+<style>
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    html, body {
+        height: 100%;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+    }
+
+    body {
+        background: #f1f5f9;
+        font-family: 'Segoe UI', Arial, sans-serif;
+        font-size: 13px;
+        color: #1e293b;
+    }
+
+    .app-shell {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100vw;
+        height: 100vh;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        background: #f8fafc;
+    }
+
+    /* ── Row 1: Logo + Stats + Toolbar ── */
+    .top-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: white;
+        padding: 12px 20px;
+        border-bottom: 1px solid #eef2f7;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+        flex-shrink: 0;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 700;
+        font-size: 18px;
+        color: #1e293b;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    .logo-icon {
+        width: 36px;
+        height: 36px;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        border-radius: 9px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 17px;
+        flex-shrink: 0;
+    }
+
+    .stats-bar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        flex: 1;
+        justify-content: center;
+    }
+
+    .stat-card {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        background: white;
+        border: 1px solid #e2e8f0;
+        padding: 8px 14px;
+        border-radius: 12px;
+        white-space: nowrap;
+    }
+
+    .stat-icon {
+        font-size: 18px;
+    }
+
+    .stat-label {
+        font-size: 10.5px;
+        color: #64748b;
+    }
+
+    .stat-value {
+        font-size: 17px;
+        font-weight: 700;
+        color: #1e293b;
+        line-height: 1.1;
+    }
+
+        .stat-value.green {
+            color: #22c55e;
+        }
+
+        .stat-value.blue {
+            color: #3b82f6;
+        }
+
+        .stat-value.amber {
+            color: #f59e0b;
+        }
+
+        .stat-value.red {
+            color: #ef4444;
+        }
+
+        .stat-value.purple {
+            color: #8b5cf6;
+        }
+
+/*    .toolbar-row {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        flex-shrink: 0;
+        align-items: flex-end;
+    }
+
+    .toolbar-row-top, .toolbar-row-bottom {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }*/
+
+    .btn {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 14px;
+        border-radius: 9px;
+        border: 1px solid #e2e8f0;
+        background: white;
+        font-size: 12.5px;
+        font-weight: 600;
+        color: #1e293b;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .toolbar-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        width: 100%;
+        max-width: 430px;
+    }
+
+        .toolbar-grid .btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+
+
+        .btn:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+        }
+
+        .btn.primary {
+            background: #6366f1;
+            color: white;
+            border-color: #6366f1;
+            font-weight: 600;
+        }
+
+            .btn.primary:hover {
+                background: #4f46e5;
+            }
+
+    /* ── kendo gantt styling overrides ── */
+    .k-gantt {
+        border: none !important;
+        background: transparent !important;
+        height: 100% !important;
+    }
+
+    .k-grid-header {
+        background: #ffffff !important;
+    }
+
+    .k-task, .k-task-summary {
+        border-radius: 6px !important;
+    }
+
+    .k-grid td {
+        font-size: 13px !important;
+    }
+
+    .k-grid-header th {
+        font-size: 13px !important;
+        font-weight: 600 !important;
+    }
+
+    /* ── Main 3-column body ── */
+    .main-body {
+        flex: 1;
+        min-height: 0;
+        width: 100%;
+        overflow: hidden;
+        display: flex;
+    }
+
+    /* ── Left Panel: Projects ── */
+    .left-panel {
+        width: 280px;
+        min-width: 280px;
+        background: white;
+        border-right: 1px solid #eef2f7;
+        padding: 18px;
+        height: 100%;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .panel-title {
+        font-weight: 700;
+        font-size: 16px;
+        margin-bottom: 14px;
+        flex-shrink: 0;
+    }
+    .panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 14px;
+    }
+
+    .group-dropdown {
+        width: 130px;
+        height: 34px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 4px 8px;
+        background: white;
+        font-size: 12px;
+        cursor: pointer;
+    }
+
+    .search-box {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        height: 42px;
+        padding: 0 12px;
+        border-radius: 11px;
+        margin-bottom: 14px;
+        flex-shrink: 0;
+    }
+
+        .search-box input {
+            border: none;
+            background: none;
+            outline: none;
+            font-size: 13px;
+            color: #374151;
+            width: 100%;
+        }
+
+    .project-list {
+        overflow-y: auto;
+        flex: 1;
+        min-height: 0;
+        padding-right: 4px;
+    }
+
+    .group-header {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        font-weight: 700;
+        font-size: 13px;
+        margin: 16px 0 8px 0;
+        cursor: pointer;
+    }
+
+    .group-dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    .project-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 10px;
+        margin-bottom: 2px;
+        border-radius: 9px;
+        cursor: pointer;
+        border-left: 3px solid transparent;
+    }
+
+        .project-item:hover {
+            background: #f1f5f9;
+        }
+
+        .project-item.active {
+            background: #f3e8ff;
+            border-left: 3px solid #7c3aed;
+        }
+
+    .project-item-left {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        min-width: 0;
+    }
+
+    .proj-icon {
+        font-size: 15px;
+        flex-shrink: 0;
+    }
+
+    .proj-name {
+        font-size: 13.5px;
+        color: #374151;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+        .proj-name.active {
+            color: #7c3aed;
+            font-weight: 600;
+        }
+
+    .proj-more {
+        color: #94a3b8;
+        font-size: 17px;
+        visibility: hidden;
+        flex-shrink: 0;
+    }
+
+    .project-item:hover .proj-more {
+        visibility: visible;
+    }
+
+    /* ── Center Panel: Gantt ── */
+    .center-panel {
+        flex: 1;
+        min-width: 0;
+        padding: 16px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+    }
+
+    .center-header {
+        margin-bottom: 12px;
+        flex-shrink: 0;
+    }
+
+        .center-header h2 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #6d28d9;
+        }
+
+        .center-header .group-label {
+            color: #7c3aed;
+            font-weight: 600;
+            font-size: 13px;
+            margin-top: 2px;
+        }
+
+    .gantt-container {
+        flex: 1;
+        min-height: 0;
+        width: 100%;
+        background: white;
+        border-radius: 14px;
+        border: 1px solid #eef2f7;
+        box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    #gantt {
+        width: 100%;
+        flex: 1;
+        min-height: 0;
+    }
+
+    /* ── Right Panel: Documents ── */
+    .right-panel {
+        width: 300px;
+        min-width: 300px;
+        background: white;
+        border-left: 1px solid #eef2f7;
+        padding: 18px;
+        height: 100%;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .right-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 14px;
+        flex-shrink: 0;
+        gap: 8px;
+    }
+
+    .upload-btn-full {
+        padding: 8px 14px;
+        border-radius: 10px;
+        background: #7c3aed;
+        color: white;
+        border: none;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+        .upload-btn-full:hover {
+            background: #6d28d9;
+        }
+
+    .doc-tabs {
+        display: flex;
+        border-bottom: 2px solid #f1f5f9;
+        margin-bottom: 14px;
+        flex-shrink: 0;
+    }
+
+    .doc-tab {
+        padding: 8px 14px;
+        font-size: 12px;
+        font-weight: 500;
+        cursor: pointer;
+        color: #64748b;
+        border-bottom: 2px solid transparent;
+        margin-bottom: -2px;
+    }
+
+        .doc-tab.active {
+            color: #7c3aed;
+            border-bottom-color: #7c3aed;
+        }
+
+    .doc-list {
+        overflow-y: auto;
+        flex: 1;
+        min-height: 0;
+    }
+
+    .doc-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 12px 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .doc-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 15px;
+    }
+
+        .doc-icon.pdf {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .doc-icon.xlsx {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .doc-icon.docx {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+
+        .doc-icon.fig {
+            background: #f3e8ff;
+            color: #9333ea;
+        }
+
+    .doc-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .doc-name {
+        font-size: 13px;
+        font-weight: 600;
+        color: #1e293b;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .doc-meta {
+        font-size: 11px;
+        color: #64748b;
+        margin-top: 2px;
+        line-height: 1.5;
+    }
+
+        .doc-meta span {
+            color: #94a3b8;
+        }
+
+    .doc-actions {
+        color: #94a3b8;
+        cursor: pointer;
+        font-size: 15px;
+        flex-shrink: 0;
+    }
+
+    .section-label {
+        font-size: 12px;
+        font-weight: 700;
+        color: #374151;
+        margin: 14px 0 6px 0;
+        flex-shrink: 0;
+    }
+
+    .view-all {
+        color: #7c3aed;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        text-align: right;
+        margin-top: 10px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        justify-content: flex-end;
+        flex-shrink: 0;
+    }
+
+    /* Hidden */
+    #projectWindow {
+        display: none;
+    }
+
+    #hiddenSelectors {
+        display: none;
+    }
+    .doc-meta {
+        display: flex;
+        gap: 12px;
+        font-size: 13px;
+        color: #666;
+        margin-top: 6px;
+        flex-wrap: wrap;
+    }
+
+    .doc-item {
+        padding: 12px 0;
+    }
+
+    .doc-info {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .doc-title {
+        font-size: 13px;
+        font-weight: 600;
+        color: #1f2937;
+        line-height: 1.3;
+    }
+
+    .doc-subtitle {
+        font-size: 11px;
+        color: #6b7280;
+        line-height: 1.4;
+    }
+
+    .doc-details {
+        margin-top: 4px;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        font-size: 12px;
+        color: #374151;
+        line-height: 1.4;
+    }
+
+        .doc-details span {
+            font-weight: 600;
+            color: #111827;
+        }
+
+    .doc-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        flex-shrink: 0;
+    }
+
+    .document-card {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+    }
+</style>
+
+<div class="app-shell">
+
+    <!-- ── Row 1: Logo | Stats (centered) | Toolbar buttons (right) ── -->
+    <div class="top-header">
+        <div class="logo">
+            <div class="logo-icon">📋</div>
+            Project Planner
+        </div>
+
+        <div class="stats-bar">
+            <div class="stat-card">
+                <span class="stat-icon">📊</span>
+                <div>
+                    <div class="stat-label">Total</div>
+                    <div class="stat-value" id="totalTasks">0</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-icon">✅</span>
+                <div>
+                    <div class="stat-label">Completed</div>
+                    <div class="stat-value green" id="completedTasks">0</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-icon">🔄</span>
+                <div>
+                    <div class="stat-label">In Progress</div>
+                    <div class="stat-value blue" id="inProgressTasks">0</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-icon">⏳</span>
+                <div>
+                    <div class="stat-label">Pending</div>
+                    <div class="stat-value amber" id="pendingTasks">0</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-icon">⏰</span>
+                <div>
+                    <div class="stat-label">Delayed</div>
+                    <div class="stat-value red" id="delayedTasks">0</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-icon">📈</span>
+                <div>
+                    <div class="stat-label">Completion</div>
+                    <div class="stat-value purple"><span id="completionPercent">0</span>%</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="toolbar-grid">
+            <input type="file" id="excelFile" hidden />
+
+            <button onclick="$('#excelFile').click()" class="btn">
+                <span style="color:#64748b;">⬆</span> Import File
+            </button>
+
+            <button id="uploadExcel" class="btn">
+                <span style="color:#64748b;">☁</span> Upload Import
+            </button>
+
+            <button id="btnAddProject" class="btn primary">
+                + Add Project
+            </button>
+
+            <button id="exportExcel" class="btn">
+                <span style="color:#16a34a;">📗</span> Export Excel
+            </button>
+
+            <button id="exportPdf" class="btn">
+                <span style="color:#dc2626;">📄</span> Export PDF
+            </button>
+
+            <button id="addGroupBtn" class="btn primary">
+                + Add Group
+            </button>
+        </div>
+    </div>
+
+    @*@if (Session["ROLE"]?.ToString() == "ADMIN")
+        {
+            <button id="addProjectBtn">Add Project</button>
+        }*@
+
+    <!-- ── Main 3-column Body ── -->
+    <div class="main-body">
+
+        <!-- Left: Projects (static placeholder list — wire to DB later) -->
+        <div class="left-panel">
+            <div class="panel-header">
+                <div class="panel-title">Projects</div>
+
+                <select id="groupFilter" class="group-dropdown">
+                    <option value="ALL">All Groups</option>
+                </select>
+            </div>
+
+            <div class="search-box">
+                <span>🔍</span>
+                <input type="text" id="projectSearch" placeholder="Search projects..." />
+            </div>
+
+            <div class="project-list" id="projectList">
+
+
+            </div>
+        </div>
+
+        <!-- Center: Gantt (functional — unchanged init logic below) -->
+        <div class="center-panel">
+            <div class="center-header">
+                <h2 id="selectedProjectName">Select Project</h2>
+                <div class="group-label" id="selectedGroupName">Group Name</div>
+            </div>
+
+            <div class="gantt-container">
+                <div id="gantt"></div>
+            </div>
+        </div>
+
+        <!-- Right: Documents (static placeholder list — wire to DB later) -->
+        <div class="right-panel">
+            <div class="right-header">
+                <div class="panel-title" style="margin-bottom:0">Documents</div>
+            </div>
+
+            <div class="doc-tabs">
+                <div class="doc-tab active">Project Documents </div>
+                
+            </div>
+
+            <div class="doc-list" id="documentList">
+
+
+            </div>
+
+           
+        </div>
+
+    </div>
+</div>
+
+<!-- Hidden elements kept for JS compatibility — project/phase selects still
+     drive the Gantt dataSource exactly as before -->
+<div id="hiddenSelectors" style="display:none;">
+    <select id="projectSelect"></select>
+
+</div>
+
+<div id="projectWindow" style="display:none;">
+    <label>Project Name</label>
+    <input type="text" id="projectName" class="k-textbox" />
+
+    <br /><br />
+
+    <label>Group</label>
+    <select id="projectGroupSelect" class="k-textbox"></select>
+
+    <br /><br />
+
+    <label>Category</label>
+    <input type="text" id="projectCategory" class="k-textbox" />
+
+    <br /><br />
+
+
+    <label>Tasks</label>
+
+    <table id="taskTable" class="table">
+        <thead>
+            <tr>
+                <th>Task Name</th>
+                <th>Start</th>
+                <th>End</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <button type="button" onclick="addTaskRow()">
+        + Add Task
+    </button>
+
+    <button type="button" onclick="saveProject()">
+        Save Project
+    </button>
+</div>
+
+<div id="groupWindow" style="display:none;">
+    <label>Group Name</label>
+    <input type="text" id="groupName" class="k-textbox" />
+
+    <br /><br />
+
+    <button type="button" onclick="saveGroup()">
+        Save Group
+    </button>
+</div>
+
+
+<div id="importWindow" style="display:none;">
+    <label>Select Sheet</label>
+    <select id="sheetSelect" class="k-textbox"></select>
+
+    <br /><br />
+
+    <label>Select Group</label>
+    <select id="importGroupSelect" class="k-textbox"></select>
+
+    <br /><br />
+
+    <label>Select Category Column</label>
+    <select id="categoryColumn"></select>
+
+    <br /><br />
+    <label>Project Column</label>
+    <select id="projectColumn"></select>
+
+    <br /><br />
+
+    <label>Task Column</label>
+    <select id="taskColumn"></select>
+
+    <br /><br />
+
+    <label>Start Date Column</label>
+    <select id="startColumn"></select>
+
+    <br /><br />
+
+    <label>End Date Column</label>
+    <select id="endColumn"></select>
+
+    <br /><br />
+
+    <label>Status Column</label>
+    <select id="statusColumn"></select>
+
+    <br /><br />
+
+    <button type="button" id="confirmImportBtn" class="btn primary">
+        Import
+    </button>
+</div>
+
+<div id="documentViewerWindow" style="display:none;">
+    <iframe id="documentFrame"
+            style="width:100%; height:600px; border:none;">
+    </iframe>
+</div>
+
+<script>
+    $(document).ready(function () {
+
+        loadGroups();
+        loadProjects();
+        $("#groupFilter").change(function () {
+
+            var selectedGroup = $(this).val();
+
+            localStorage.setItem("selectedGroup", selectedGroup);
+
+            loadProjects(selectedGroup);
+        });
+
+        var savedGroup = localStorage.getItem("selectedGroup") || "ALL";
+
+        setTimeout(function () {
+            $("#groupFilter").val(savedGroup).trigger("change");
+        }, 300);
+
+
+        $("#btnAddProject").click(function () {
+
+            loadProjectGroups();
+
+            $("#projectWindow").kendoWindow({
+                width: "800px",
+                title: "Add Project",
+                modal: true
+            }).data("kendoWindow").center().open();
+        });
+
+        $("#addGroupBtn").click(function () {
+
+            $("#groupName").val("");
+
+            $("#groupWindow").kendoWindow({
+                width: "400px",
+                title: "Add Group",
+                modal: true
+            }).data("kendoWindow").center().open();
+
+        });
+
+        var userRole = '@Session["Role"]'.toUpperCase();
+
+
+
+
+        function loadDashboard() {
+
+            console.log("Dashboard sending project:", $("#projectSelect").val());
+
+            $.get("/Task/GetDashboardStats", {
+                projectId: $("#projectSelect").val() || 1,
+                phaseId: $("#phaseSelect").val() || 1
+            }, function (data) {
+                $("#totalTasks").text(data.total);
+                $("#completedTasks").text(data.completed);
+                $("#inProgressTasks").text(data.inProgress);
+                $("#pendingTasks").text(data.pending);
+                $("#delayedTasks").text(data.delayed);
+                $("#completionPercent").text(data.completion);
+            });
+        }
+
+        function loadImportGroups() {
+            $.get("/Task/GetGroups", function (data) {
+
+                var dropdown = $("#importGroupSelect");
+                dropdown.empty();
+
+                $.each(data, function (i, group) {
+                    dropdown.append(`
+                        <option value="${group.name}">
+                            ${group.name}
+                        </option>
+                    `);
+                });
+                
+            });
+        }
+
+        $("#sheetSelect").change(function () {
+
+            var file = $("#excelFile")[0].files[0];
+
+            var formData = new FormData();
+            formData.append("file", file);
+            formData.append("sheetName", $(this).val());
+
+            $.ajax({
+                url: "/Task/GetSheetColumns",
+                type: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+
+                success: function (data) {
+
+                    console.log(data);
+                    var dropdowns = [
+                        "#projectColumn",
+                        "#taskColumn",
+                        "#startColumn",
+                        "#endColumn",
+                        "#statusColumn",
+                        "#categoryColumn"
+                    ];
+
+                    $.each(dropdowns, function (i, selector) {
+                        $(selector).empty();
+
+                        $(selector).append(`
+                            <option value="0">None</option>
+                        `);
+
+                        $.each(data, function (j, col) {
+                            $(selector).append(`
+                                <option value="${col.Index}">
+                                    ${col.Name}
+                                </option>
+                            `);
+                        });
+                        });
+                    
+                }
+            });
+        });
+
+        $("#excelFile").change(function () {
+
+            var file = $("#excelFile")[0].files[0];
+
+            var formData = new FormData();
+            formData.append("file", file);
+
+            $.ajax({
+                url: "/Task/GetExcelSheets",
+                type: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+
+                success: function (data) {
+
+                    var dropdown = $("#sheetSelect");
+                    dropdown.empty();
+
+                    $.each(data, function (i, sheet) {
+                        dropdown.append(`
+                    <option value="${sheet}">
+                        ${sheet}
+                    </option>
+                `);
+                    });
+
+                    loadImportGroups();
+
+                    $("#importWindow").kendoWindow({
+                        width: "450px",
+                        title: "Import Project File",
+                        modal: true
+                    }).data("kendoWindow").center().open();
+                }
+            });
+        });
+
+        // Load Projects
+        
+
+        function loadProjects(selectedGroup = "") {
+
+            $.get("/Task/GetProjects", function (data) {
+
+                var projectList = $("#projectList");
+                var dropdown = $("#projectSelect");
+
+                projectList.empty();
+                dropdown.empty();
+
+                let groupedProjects = {};
+
+                $.each(data, function (i, project) {
+
+                    if (!groupedProjects[project.group]) {
+                        groupedProjects[project.group] = {};
+                    }
+
+                    var categoryName = project.category || "Uncategorized";
+
+                    if (!groupedProjects[project.group][categoryName]) {
+                        groupedProjects[project.group][categoryName] = [];
+                    }
+
+                    groupedProjects[project.group][categoryName].push(project);
+                });
+
+                $.each(groupedProjects, function (groupName, categories) {
+
+                    // IMPORTANT FILTER
+                    if (selectedGroup && selectedGroup !== "ALL" && groupName !== selectedGroup) {
+                        return;
+                    }
+
+                    projectList.append(`
+                        <div class="group-header">
+                            <div class="group-dot"></div>
+                            <span>${groupName}</span>
+                        </div>
+                    `);
+
+                    $.each(categories, function (categoryName, projects) {
+
+                        projectList.append(`
+                            <div class="category-header"
+                                 style="margin-left:15px;
+                                        font-size:12px;
+                                        font-weight:600;
+                                        color:#64748b;
+                                        margin-top:8px;">
+                                ${categoryName}
+                            </div>
+                        `);
+
+                        $.each(projects, function (i, project) {
+
+                            dropdown.append(`
+                                <option value="${project.id}">
+                                    ${project.name}
+                                </option>
+                            `);
+
+                            projectList.append(`
+                                <div class="project-item"
+                                    data-id="${project.id}" 
+                                    data-name="${project.name}"
+                                    data-group="${project.group}"
+                                    data-category="${project.category}"
+                                    style="margin-left:25px;">
+
+                                    <div class="project-item-left">
+                                        <span class="proj-icon">📁</span>
+                                        <span class="proj-name">${project.name}</span>
+                                    </div>
+
+                                    <span class="proj-more">⋯</span>
+                                </div>
+                            `);
+                        });
+
+                    });
+                });
+
+                $(".project-item").click(function () {
+
+                    $(".project-item").removeClass("active");
+                    $(this).addClass("active");
+
+                    var projectId = $(this).data("id");
+                    var projectName = $(this).data("name");
+                    var projectGroup = $(this).data("group");
+                    var projectCategory = $(this).data("category");
+
+                    $("#selectedProjectName").text(projectName);
+                    $("#selectedGroupName").text(projectGroup + " → " + projectCategory);
+
+
+                    $("#projectSelect").val(projectId).trigger("change");
+                    localStorage.setItem("selectedProject", projectId);
+
+                    loadDocuments(projectId);
+                    loadDashboard();
+                });
+            });
+        }
+
+        //load documents
+
+        function loadDocuments(projectId) {
+            $.get("/Task/GetProjectDocuments", { projectId: projectId }, function (data) {
+
+                var docList = $("#documentList");
+                docList.empty();
+
+                $.each(data, function (i, doc) {
+                    console.log(doc);   
+                    console.log(doc.filePath);
+
+                    var iconClass = "docx";
+
+                    if (doc.fileName.endsWith(".pdf"))
+                        iconClass = "pdf";
+                    else if (doc.fileName.endsWith(".xlsx"))
+                        iconClass = "xlsx";
+                    else if (doc.fileName.endsWith(".fig"))
+                        iconClass = "fig";
+
+                    docList.append(`
+                        <div class="doc-item" onclick="window.open('${doc.filePath}', '_blank')">
+                            <div class="doc-icon ${iconClass}">📄</div>
+
+                           <div class="doc-info">
+
+                                <div class="doc-title">
+                                    ${doc.fileName}
+                                </div>
+
+                                <div class="doc-subtitle">
+                                    Uploaded by <b>${doc.uploadedByName}</b> • ${doc.uploadedOn}
+                                </div>
+
+                                <div class="doc-details">
+                                    <div><span>Group:</span> ${doc.groupName}</div>
+                                    <div><span>Category:</span> ${doc.categoryName}</div>
+                                    <div><span>Project:</span> ${doc.projectName}</div>
+                                    <div><span>Task:</span> ${doc.taskName}</div>
+                                </div>
+
+                            </div>
+
+                            <div class="doc-actions">⋯</div>
+                        </div>
+                    `);
+                });
+                console.log("Documents loading for:", projectId);
+            });
+        }
+
+        //Load Groups
+
+        function loadGroups() {
+            $.get("/Task/GetGroups", function (data) {
+
+                var dropdown = $("#groupFilter");
+
+                // clear everything
+                dropdown.html("");
+
+                // add default
+                dropdown.append(`
+                    <option value="ALL">All Groups</option>
+                `);
+
+                // add fresh DB groups only
+                $.each(data, function (i, group) {
+                    dropdown.append(`
+                        <option value="${group.name}">
+                            ${group.name}
+                        </option>
+                    `);
+                });
+            });
+        }
+        window.loadGroups = loadGroups;
+
+        //Load ProjectGroups
+
+        function loadProjectGroups() {
+
+            $.get("/Task/GetGroups", function (data) {
+
+                var dropdown = $("#projectGroupSelect");
+
+                dropdown.empty();
+
+                $.each(data, function (i, group) {
+                    dropdown.append(`
+                <option value="${group.name}">
+                    ${group.name}
+                </option>
+            `);
+                });
+            });
+        }
+
+        // Export Buttons
+        $("#exportExcel").click(function () {
+            window.location.href = "/Task/ExportToExcel";
+        });
+
+        $("#exportPdf").click(function () {
+            window.location.href = "/Task/ExportToPdf";
+        });
+
+        //Upload Logic
+
+        $("#confirmImportBtn").click(function () {
+
+            var file = $("#excelFile")[0].files[0];
+
+            if (!file) {
+                alert("Select file first");
+                return;
+            }
+
+            var formData = new FormData();
+
+            formData.append("file", file);
+            formData.append("sheetName", $("#sheetSelect").val());
+            formData.append("groupName", $("#importGroupSelect").val());
+
+            formData.append("projectCol", $("#projectColumn").val());
+            formData.append("taskCol", $("#taskColumn").val());
+            formData.append("startCol", $("#startColumn").val());
+            formData.append("endCol", $("#endColumn").val());
+            formData.append("statusCol", $("#statusColumn").val());
+            formData.append("categoryCol", $("#categoryColumn").val());
+
+
+            $.ajax({
+                url: "/Task/ImportProjects",
+                type: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+
+                success: function (response) {
+                    alert(response.message);
+
+                    $("#importWindow").data("kendoWindow").close();
+
+                    location.reload();
+                }
+            });
+        });
+
+        // Project Change
+        $("#projectSelect").change(function () {
+            loadDashboard();
+            loadDocuments($(this).val());
+            $("#gantt").data("kendoGantt").dataSource.read();
+        });
+
+
+
+        // Destroy old gantt
+        if ($("#gantt").data("kendoGantt")) {
+            $("#gantt").data("kendoGantt").destroy();
+            $("#gantt").empty();
+        }
+
+        // Gantt Init
+        $("#gantt").kendoGantt({
+            date: new Date(),
+
+            taskContentTemplate: function (data) {
+                return `
+                    <div>
+                        <div>${data.title}</div>
+                        <small style="color:#ff4d4d;">
+                            ${data.assignedToName || ""}
+                        </small>
+                    </div>
+                `;
+            },
+
+            save: function (e) {
+                var gantt = $("#gantt").data("kendoGantt");
+
+                setTimeout(function () {
+                    if (gantt) {
+                        if (gantt.dataSource) {
+                            gantt.dataSource.read();
+                        }
+
+                        if (gantt.dependencies && gantt.dependencies.dataSource) {
+                            gantt.dependencies.dataSource.read();
+                        }
+                    }
+                    loadDashboard();
+                }, 500);
+            },
+
+            remove: function (e) {
+                var gantt = $("#gantt").data("kendoGantt");
+
+                setTimeout(function () {
+                    if (gantt.dataSource) {
+                        gantt.dataSource.read();
+                    }
+
+                    if (gantt.dependencies && gantt.dependencies.dataSource) {
+                        gantt.dependencies.dataSource.read();
+                    }
+                    loadDashboard();
+                }, 500);
+            },
+
+            toolbar: (userRole === "ADMIN" || userRole === "MANAGER")
+                ? ["append"]
+                : false,
+
+            editable: {
+                mode: "popup",
+                confirmation: true,
+                create: true,
+                update: true,
+                destroy: true
+            },
+
+            edit: function (e) {
+                var container = e.container;
+
+                // Assigned To
+                if (container.find("input[name='assignedToName']").length === 0) {
+                    $('<div class="k-edit-label"><label>Assigned To</label></div>')
+                        .appendTo(container);
+
+                    $('<div class="k-edit-field">' +
+                        '<input name="assignedToName" ' +
+                        'data-bind="value:assignedToName" ' +
+                        'class="k-textbox" />' +
+                        '</div>')
+                        .appendTo(container);
+                }
+
+                // Attachment
+                if (container.find("#taskFile").length === 0) {
+                    $('<div class="k-edit-label"><label>Attachment</label></div>')
+                        .appendTo(container);
+
+                    $('<div class="k-edit-field">' +
+                        '<input type="file" id="taskFile" />' +
+                        '<button type="button" class="k-button" ' +
+                        'onclick="uploadTaskFile(' + e.task.id + '); return false;">Upload</button>' +
+                        '</div>')
+                        .appendTo(container);
+                }
+
+                kendo.bind(container, e.task);
+
+                console.log("Task Title:", e.task.title);
+            },
+
+            showWorkDays    : true,
+            showWorkHours: false,
+            snap: false,
+            workWeekStart: 0,
+            workWeekEnd: 6,
+
+            dataSource: {
+                transport: {
+                    read: {
+                        url: "/Task/GetTasks",
+                        dataType: "json",
+                        data: function () {
+                            return {
+                                projectId: $("#projectSelect").val() || 1,
+                            };
+                        }
+                    },
+
+                    create: {
+                        url: "/Task/AddTask",
+                        type: "POST",
+                        contentType: "application/json"
+                    },
+
+                    update: {
+                        url: "/Task/UpdateTask",
+                        type: "POST",
+                        contentType: "application/json"
+                    },
+
+                    destroy: {
+                        url: "/Task/DeleteTask",
+                        type: "POST",
+                        contentType: "application/json"
+                    },
+                    requestEnd: function (e) {
+                        if (e.type === "destroy") {
+                            $("#gantt").data("kendoGantt").dataSource.read();
+                        }
+                    },
+
+                    parameterMap: function (options, operation) {
+
+                        if (operation === "read") {
+                            return options;
+                        }
+
+                        if (operation === "create" || operation === "update") {
+
+                            var task = options.models ? options.models[0] : options;
+
+                            task.title = task.title || "New Task";
+
+                            task.start = kendo.toString(task.start, "yyyy-MM-dd");
+                            task.end = kendo.toString(task.end, "yyyy-MM-dd");
+
+                            task.projectId = parseInt($("#projectSelect").val()) || 1;
+
+                            task.attachmentName = task.attachmentName || "";
+                            task.attachmentPath = task.attachmentPath || "";
+
+                            console.log("Sending:", task);
+
+                            return JSON.stringify(task);
+                        }
+
+                        if (operation === "destroy") {
+                            console.log("Deleting:", options);
+                            return JSON.stringify(options);
+                        }
+
+                        return options;
+                    }
+                },
+
+                schema: {
+                    model: {
+                        id: "id",
+                        fields: {
+                            id: { type: "number", editable: false, nullable: true },
+                            projectId: { type: "number" },
+                            parentId: { nullable: true },
+                            orderId: { type: "number" },
+                            title: { type: "string" },
+                            assignedToName: { type: "string" },
+                            assignedTo: { type: "number" },
+                            start: { type: "date" },
+                            end: { type: "date" },
+                            actualStart: { type: "date" },
+                            actualEnd: { type: "date" },
+                            variance: { type: "number" },
+                            status: { type: "string" },
+                            percentComplete: { type: "number" }
+                        }
+                    }
+                },
+
+                error: function (e) {
+                    console.log("Kendo Error:", e);
+                    alert("Operation failed. Check console.");
+                }
+            },
+
+            dependencyDataSource: {
+                transport: {
+                    read: {
+                        url: "/Task/GetDependencies",
+                        dataType: "json",
+                        data: function () {
+                            return {
+                                projectId: $("#projectSelect").val() || 1
+                            };
+                        }
+                    }
+                }
+            },
+
+            views: [
+                { type: "day" },
+                { type: "week", selected: true },
+                { type: "month" },
+                { type: "year" }
+            ],
+
+            columns: [
+                { field: "title", title: "Task Name", width: 200 },
+                { field: "assignedToName", title: "Assigned To", width: 150 },
+                {
+                    field: "attachmentName",
+                    title: "Attachment",
+                    width: 180,
+                    template: function (data) {
+                        if (data.attachmentPath) {
+                            return '<a href="' + data.attachmentPath + '" target="_blank">'
+                                + data.attachmentName +
+                                '</a>';
+                        }
+                        return "No File";
+                    }
+                },
+                {
+                    field: "attachedByName",
+                    title: "Uploaded By",
+                    width: 150
+                },
+                {
+                    field: "attachedOn",
+                    title: "Uploaded On",
+                    width: 180,
+                    template: function (dataItem) {
+                        if (!dataItem.attachedOn) return "";
+
+                        return kendo.toString(
+                            new Date(parseInt(dataItem.attachedOn.replace(/\/Date\((\d+)\)\//, "$1"))),
+                            "dd-MMM-yyyy HH:mm"
+                        );
+                    }
+                },
+                { field: "start", title: "Planned Start", format: "{0:dd/MM/yyyy}", width: 150 },
+                { field: "end", title: "Planned End", format: "{0:dd/MM/yyyy}", width: 150 },
+                { field: "actualStart", title: "Actual Start", format: "{0:dd/MM/yyyy}", width: 150 },
+                { field: "actualEnd", title: "Actual End", format: "{0:dd/MM/yyyy}", width: 150 },
+                {
+                    field: "variance",
+                    title: "Schedule",
+                    width: 150,
+                    template: function (dataItem) {
+                        if (dataItem.variance > 0)
+                            return "Late by " + dataItem.variance + "d";
+                        else if (dataItem.variance < 0)
+                            return "Early by " + Math.abs(dataItem.variance) + "d";
+                        else
+                            return "On Time";
+                    }
+                },
+                { field: "status", title: "Status", width: 120 },
+                {
+                    field: "percentComplete",
+                    title: "% Complete",
+                    template: "#= percentComplete * 100 #%",
+                    width: 120
+                }
+            ],
+
+            taskContentTemplate: function (data) {
+                return `
+                    <div>
+                        <div>${data.title}</div>
+                        <small style="color:#ff4d4d;">
+                            ${data.assignedToName || ""}
+                        </small>
+                    </div>
+                `;
+            },
+
+            height: 600
+        });
+
+        // Make Gantt fill its container's real pixel height instead of the
+        // fixed 600 set above (Kendo needs a resize() call once mounted).
+        function resizeGanttToContainer() {
+            var $gantt = $("#gantt");
+            if ($gantt.data("kendoGantt")) {
+                $gantt.data("kendoGantt").resize(true);
+            }
+        }
+        $(window).on("resize", resizeGanttToContainer);
+
+        // give the fixed-position layout two paint cycles to settle before measuring
+        requestAnimationFrame(function () {
+            requestAnimationFrame(resizeGanttToContainer);
+        });
+
+        // FIXED: load gantt AFTER initialization
+        var gantt = $("#gantt").data("kendoGantt");
+        gantt.dataSource.read();
+        if (gantt.dependencies && gantt.dependencies.dataSource) {
+            gantt.dependencies.dataSource.read();
+        }
+
+    });
+
+    function uploadTaskFile(taskId, e) {
+        event.stopPropagation();
+
+        if (e) e.preventDefault();
+        var file = $("#taskFile")[0].files[0];
+
+        if (!file) {
+            alert("Please select a file");
+            return;
+        }
+
+        var formData = new FormData();
+        formData.append("file", file);
+        formData.append("taskId", taskId);
+
+        $.ajax({
+            url: "/Task/UploadAttachment",
+            type: "POST",
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function () {
+                alert("File uploaded successfully");
+
+                var gantt = $("#gantt").data("kendoGantt");
+                gantt.dataSource.read();
+            }
+        });
+    }
+
+    function addTaskRow() {
+        $("#taskTable tbody").append(`
+        <tr>
+            <td><input class="k-textbox taskName" /></td>
+            <td><input type="date" class="startDate" /></td>
+            <td><input type="date" class="endDate" /></td>
+        </tr>
+    `);
+    }
+
+    function saveProject() {
+        var projectData = {
+            projectName: $("#projectName").val(),
+            groupName: $("#projectGroupSelect").val(),
+            categoryName: $("#projectCategory").val(),
+            tasks: []
+        };
+
+        $("#taskTable tbody tr").each(function () {
+            projectData.tasks.push({
+                title: $(this).find(".taskName").val(),
+                start: $(this).find(".startDate").val(),
+                end: $(this).find(".endDate").val()
+            });
+        });
+
+        console.log(projectData);
+
+        $.ajax({
+            url: "/Task/AddProject",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(projectData),
+            success: function () {
+                alert("Project added successfully");
+                location.reload();
+            }
+        });
+    }
+
+    function saveGroup() {
+
+        var groupName = $("#groupName").val();
+
+        if (!groupName) {
+            alert("Enter group name");
+            return;
+        }
+
+        $.post("/Task/AddGroup",
+            {
+                groupName: groupName
+            },
+            function (res) {
+
+                if (res.success) {
+                    alert("Group added");
+
+                    $("#groupWindow").data("kendoWindow").close();
+
+                    loadGroups(); // refresh dropdown
+                }
+            });
+    }
+
+    function openDocument(fileName) {
+
+        var fileUrl = "/Uploads/" + fileName;
+        var extension = fileName.split('.').pop().toLowerCase();
+
+        if (extension === "pdf") {
+            $("#documentFrame").attr("src", fileUrl);
+
+            $("#documentViewerWindow").kendoWindow({
+                width: "1000px",
+                height: "700px",
+                title: fileName,
+                modal: true,
+                visible: false
+            }).data("kendoWindow").center().open();
+        }
+        else {
+            window.open(fileUrl, "_blank");
+        }
+    }
+
+</script>

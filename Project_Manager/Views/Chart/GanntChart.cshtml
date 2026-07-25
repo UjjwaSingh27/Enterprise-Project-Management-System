@@ -1,0 +1,36 @@
+﻿@{
+    ViewBag.Title = "Gantt Chart";
+}
+
+<h2>Gantt Chart</h2>
+
+<div id="gantt"></div>
+
+@section scripts{
+    <script>
+        $(document).ready(function () {
+            $("#gantt").kendoGantt({
+                dataSource: {
+                    data: [
+                        {
+                            id: 1,
+                            parentId: null,
+                            orderId: 0,
+                            title: "Project Start",
+                            start: new Date(),
+                            end: new Date(new Date().getTime() + 2 * 24 * 60 * 60 * 1000),
+                            percentComplete: 0.5,
+                            summary: false,
+                            expanded: true
+                        }
+                    ]
+                },
+                views: ["day", "week", "month"],
+                columns: [
+                    { field: "title", title: "Task Name" }
+                ],
+                height: 600
+            });
+        });
+    </script>
+}

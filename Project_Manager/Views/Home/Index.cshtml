@@ -1,0 +1,294 @@
+﻿@{
+    ViewBag.Title = "Dashboard";
+}
+
+<style>
+    body {
+        background: #f5f7fb;
+    }
+
+    .dashboard-container {
+        max-width: 1200px;
+        margin: 40px auto;
+        padding: 20px;
+    }
+
+    .top-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 15px;
+    }
+
+    .logout-btn {
+        background: white;
+        border: 1px solid #ddd;
+        padding: 10px 18px;
+        border-radius: 10px;
+        color: #444;
+        text-decoration: none;
+        font-weight: 600;
+        transition: .3s;
+    }
+
+        .logout-btn:hover {
+            background: #6C63FF;
+            color: white;
+            text-decoration: none;
+        }
+    .header h1 {
+        font-size: 38px;
+        color: #2b2b2b;
+    }
+
+    .header p {
+        margin: 8px 0;
+    }
+    .subtitle {
+        color: #777;
+        margin-top: 8px;
+    }
+
+    .module-card {
+        margin-top: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: white;
+        border-radius: 18px;
+        padding: 35px;
+        box-shadow: 0 15px 35px rgba(0,0,0,.08);
+        transition: .3s;
+        width: 100%;
+        max-width: 850px;
+        margin: 30px auto;
+        border: 1px solid #ececec;
+    }
+
+        .module-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 45px rgba(0,0,0,.12);
+        }
+
+    .module-icon {
+        width: 75px;
+        height: 75px;
+        font-size: 32px;
+        border-radius: 20px;
+        background: linear-gradient(135deg,#6C63FF,#5147EB);
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        
+    }
+
+    .module-content {
+        flex: 1;
+        padding-left: 35px;
+    }
+
+        .module-content h2 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        .module-content ul {
+            margin-top: 20px;
+        }
+
+        .module-content li {
+            margin-bottom: 10px;
+        }
+
+    .open-btn {
+        background: #6C63FF;
+        color: white;
+        padding: 12px 24px;
+        font-size: 15px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+        .open-btn:hover {
+            background: #5147eb;
+            color: white;
+            text-decoration: none;
+        }
+
+    .footer-info {
+        margin: 35px auto 0;
+        max-width: 950px;
+        display: flex;
+        justify-content: space-between;
+        background: #ffffff;
+        border: 1px solid #ececec;
+        border-radius: 12px;
+        margin-top: 25px;
+        padding: 18px 25px;
+        
+        box-shadow: 0 5px 15px rgba(0,0,0,.05);
+        color: #666;
+    }
+
+    .portal-text {
+        color: #666;
+        margin-top: 8px;
+        font-size: 17px;
+    }
+    .module-action {
+        display: flex;
+        align-items: flex-end;
+        height: 220px;
+    }
+
+    .feature-list {
+        margin-top: 20px;
+    }
+
+        .feature-list div {
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+
+        .feature-list i {
+            color: #6C63FF;
+            margin-right: 10px;
+        }
+
+    .dashboard-divider {
+        border: none;
+        height: 1px;
+        background: #e5e7eb;
+        margin: 20px 0;
+    }
+
+    .footer-info strong{
+    color:#333;
+}
+
+.footer-info span{
+    color:#6C63FF;
+    font-weight:600;
+}
+</style>
+
+<div class="dashboard-container">
+
+    <div class="top-bar">
+
+        <h1>Project Manager</h1>
+
+        <a href="@Url.Action("Logout","Account")" class="logout-btn">
+            <i class="fa-solid fa-right-from-bracket"></i>
+            Logout
+        </a>
+
+    </div>
+
+    <div class="header">
+
+
+
+        <p>
+            <i class="fa-solid fa-user"></i>
+
+            Welcome Back,
+
+            <strong>@Session["USERNAME"]</strong>
+        </p>
+
+        <p class="portal-text">
+
+            Enterprise Project Management Portal
+
+        </p>
+
+        <p class="subtitle">
+
+            Select a module to continue.
+
+        </p>
+        <hr class="dashboard-divider" />
+
+    </div>
+
+
+    <div class="module-card">
+
+        <div class="module-icon">
+            <i class="fa-solid fa-diagram-project"></i>
+        </div>
+
+        <div class="module-content">
+
+            <h2>Project Planner</h2>
+
+            <p>
+                Enterprise Project Timeline Management System
+            </p>
+
+            
+
+                <div class="feature-list">
+
+                    <div><i class="fa-solid fa-circle-check"></i> Manage Groups & Categories</div>
+
+                    <div><i class="fa-solid fa-circle-check"></i> Manage Projects & Phases</div>
+
+                    <div><i class="fa-solid fa-circle-check"></i> Track Tasks & Progress</div>
+
+                    <div><i class="fa-solid fa-circle-check"></i> Upload Project Documents</div>
+
+                    <div><i class="fa-solid fa-circle-check"></i> Import & Export Excel</div>
+
+                </div>
+
+            
+
+        </div>
+
+        <div class="module-action">
+
+            <a href="@Url.Action("Planner","Task")"
+               class="open-btn">
+
+                Open Planner →
+
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <div class="footer-info">
+
+        <div>
+
+            <strong>Logged in as :</strong>
+
+            @Session["Role"]
+
+        </div>
+
+        <div>
+
+            <strong>Date :</strong>
+
+            @DateTime.Now.ToString("dd-MMM-yyyy")
+
+        </div>
+
+        <div>
+
+            <strong>Version :</strong>
+
+            1.0
+
+        </div>
+
+    </div>
+
+</div>
