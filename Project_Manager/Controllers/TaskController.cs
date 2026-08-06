@@ -212,7 +212,7 @@ namespace Project_Manager.Controllers
 
                     if (progress == 100)
                     {
-                        status = "COMPLETED";
+                        status = "COMPLETED";   
                     }
                     else if (DateTime.Now > endDate)
                     {
